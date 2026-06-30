@@ -24,7 +24,6 @@ registrations = [
 @app.post("/registrations", status_code=status.HTTP_201_CREATED)
 def create_registration(payload: RegistrationCreate):
     
-    # 1. Kiểm tra student_id tồn tại (Cổ điển)
     student_exists = False
     for s in students:
         if s["id"] == payload.student_id:
@@ -37,7 +36,7 @@ def create_registration(payload: RegistrationCreate):
             detail="Student not found"
         )
         
-    # 2. Kiểm tra course_id tồn tại (Cổ điển)
+    
     course_data = None
     for c in courses:
         if c["id"] == payload.course_id:
@@ -50,7 +49,6 @@ def create_registration(payload: RegistrationCreate):
             detail="Course not found"
         )
         
-    # 3. Bẫy 1: Kiểm tra Đăng ký trùng (Cổ điển - Không dùng any)
     is_duplicated = False
     for r in registrations:
         if r["student_id"] == payload.student_id and r["course_id"] == payload.course_id:
@@ -63,11 +61,10 @@ def create_registration(payload: RegistrationCreate):
             detail="Student already registered this course"
         )
         
-    # 4. Bẫy 2: Kiểm tra Khóa học đã đủ sĩ số (Cổ điển - Không dùng sum)
     current_enrolled = 0
     for r in registrations:
         if r["course_id"] == payload.course_id:
-            current_enrolled += 1 # Đếm thủ công từng học viên
+            current_enrolled += 1 
             
     if current_enrolled >= course_data["capacity"]:
         raise HTTPException(
@@ -75,7 +72,6 @@ def create_registration(payload: RegistrationCreate):
             detail="Course is full"
         )
         
-    # 5. Tìm ID lớn nhất để tự động tăng (Cổ điển - Không dùng max list comprehension)
     new_id = 1
     if registrations:
         max_id = registrations[0]["id"]
@@ -84,7 +80,6 @@ def create_registration(payload: RegistrationCreate):
                 max_id = r["id"]
         new_id = max_id + 1
         
-    # Tiến hành tạo đăng ký mới
     new_reg = {
         "id": new_id,
         "student_id": payload.student_id,
